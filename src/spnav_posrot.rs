@@ -1,5 +1,6 @@
 use crate::{quat::Quat, quat::QuatOperationable, spnav_event_motion, vector::VectorOperationable};
 
+#[derive(Debug)]
 pub struct Position {
     pub pos: [f32; 3],
     pub rot: Quat,
@@ -7,6 +8,7 @@ pub struct Position {
 impl Position {
     pub fn new() -> Position {
         Position {
+            // [0.054270774126052856,-0.09371928870677948,0.11698655784130096]
             pos: [0.0, 0.0, 0.0],
             rot: [0.0, 0.0, 0.0, 1.0],
         }

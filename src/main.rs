@@ -24,6 +24,42 @@ mod vector;
 
 #[tokio::main]
 async fn main() {
+    // TEST
+    let mut pos: Position = Position {
+        pos: [
+            0.06597165763378143,
+            -0.11405778676271439,
+            0.07619363069534302,
+        ],
+        rot: [0.0, 0.0, 0.0, 1.0],
+    };
+
+    let mut view: Matrix = [
+        0.8660254057273917,
+        0.4999999966347066,
+        6.730586865622001e-9,
+        0.0,
+        -0.25000000420661683,
+        0.43301270140648107,
+        0.8660254028129621,
+        0.0,
+        0.43301269557762184,
+        -0.75000000252397,
+        0.5000000016826467,
+        0.0,
+        0.06750000169786065,
+        -0.11691343455006951,
+        0.07794228970004634,
+        1.0,
+    ];
+
+    println!("OLD:  {:?}", view);
+    view.view(&pos);
+    println!("NEW:  {:?}", view);
+
+    return;
+    // TEST
+
     let websocket = warp::path::end()
         .and(warp::ws())
         .map(|ws: warp::ws::Ws| {
@@ -318,6 +354,8 @@ async fn handle_call(json: &Vec<Value>, session: &mut Session) -> Result<Message
             if let Value::Object(map) = &json[4] {
                 if let Some((_, Value::Object(frame))) = map.get_key_value("frame") {
                     if let Some((_, Value::Number(time))) = frame.get_key_value("time") {
+                        std::thread::sleep(std::time::Duration::from_secs(5));
+
                         session
                             .transmitter
                             .send(build_update_call(
@@ -330,18 +368,26 @@ async fn handle_call(json: &Vec<Value>, session: &mut Session) -> Result<Message
 
                         session.transactions += 1;
 
-                        session.position.move_obj(&spnav_event_motion {
+                        println!("OLD:  {:?}", session.position);
+
+                        session.position.move_view(&spnav_event_motion {
                             event_type: 0,
                             x: 0,
                             y: 0,
                             z: 0,
-                            rx: 50,
+                            rx: 0,
                             ry: 0,
                             rz: 0,
                             period: 0,
                         });
 
+                        println!("NEW:  {:?}", session.position);
+
+                        println!("OLD:  {:?}", session.view_matrix);
+
                         session.view_matrix.view(&session.position);
+
+                        println!("NEW:  {:?}", session.view_matrix);
 
                         session
                             .transmitter

@@ -3,6 +3,7 @@ use crate::spnav_posrot::Position;
 
 pub type Matrix = [f32; 16];
 pub trait MatrixOperationable {
+    fn obj(&mut self, pos: &Position);
     fn view(&mut self, pos: &Position);
     fn quat(&mut self, q: &Quat);
     fn translation(&mut self, x: f32, y: f32, z: f32);
@@ -10,10 +11,19 @@ pub trait MatrixOperationable {
 }
 
 impl MatrixOperationable for Matrix {
-    fn view(&mut self, pos: &Position) {
+    fn obj(&mut self, pos: &Position) {
         let mut tmp: Matrix = [0.0; 16];
         self.quat(&pos.rot);
+        println!("BEF:  {:?}", self);
         tmp.translation(pos.pos[0], pos.pos[1], pos.pos[2]);
+        self.mul(&tmp)
+    }
+
+    fn view(&mut self, pos: &Position) {
+        let mut tmp: Matrix = [0.0; 16];
+        self.translation(pos.pos[0], pos.pos[1], pos.pos[2]);
+        println!("BEF:  {:?}", self);
+        tmp.quat(&pos.rot);
         self.mul(&tmp)
     }
 
@@ -45,8 +55,9 @@ impl MatrixOperationable for Matrix {
     }
 
     fn translation(&mut self, x: f32, y: f32, z: f32) {
+        // [1,0,0,0,0,0,-1,0,0,1,0,0,0,0,0,1]
         *self = [
-            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            1.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
         ];
         self[12] = x;
         self[13] = y;
